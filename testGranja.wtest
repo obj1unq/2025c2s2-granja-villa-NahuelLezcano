@@ -1,0 +1,110 @@
+import mercados.*
+import wollok.game.*
+import cultivos.*
+import personaje.*
+import aspersores.*
+
+describe "Granja Test" {
+  
+    method initialize() {
+        game.clear()
+        game.height(10)
+	    game.width(10)
+    }
+
+    test "No se puede cultivar si ya esta ocupado el espacio por otro cultivo" {
+        personaje.sembrar(new Maiz())
+
+        assert.throwsException({ personaje.sembrar(new Tomaco()) })
+    }
+
+    test "No se puede regar si no hay plantas en la posicion actual" {
+        assert.throwsException({ personaje.regarCultivo() })
+    }
+
+    test "El granjero recuerda todas las plantas que se cosecharon" {
+       
+        const maiz = new Maiz()
+        const tomaco = new Tomaco()
+        personaje.sembrar(tomaco)
+        personaje.position(personaje.position().up(1))
+        personaje.sembrar(maiz)
+        personaje.regarCultivo()
+        personaje.cosecharCultivo()
+        personaje.position(personaje.position().down(1))
+        personaje.cosecharCultivo()
+
+        assert.that(personaje.cosecha().contains(maiz))
+        assert.that(personaje.cosecha().contains(tomaco))
+    }
+
+    test "No se puede cosechar si no hay ninguna planta" {
+        assert.throwsException({ personaje.cosecharCultivo() })
+    }
+
+    test "El granjero no puede vender su cosecha si no se encuentra en un mercado" {
+        assert.throwsException({ personaje.venderCosecha() })
+    }
+
+    test "Si el mercado no tiene suficientes monedas, entonces el granjero no venderá su cosecha" {
+        
+        const maiz = new Maiz()
+        const tomaco = new Tomaco()
+        personaje.sembrar(tomaco)
+        personaje.position(personaje.position().up(1))
+        personaje.sembrar(maiz)
+        personaje.regarCultivo()
+        personaje.cosecharCultivo()
+        personaje.position(personaje.position().down(1))
+        personaje.cosecharCultivo()
+
+        const mercado = mercadosEnElJuego.losMercados().get(0)
+        mercado.monedas(0)
+        personaje.position(game.at(0,9))
+
+        assert.throwsException({ personaje.venderCosecha() })
+    }
+
+    test "Cuando el granjero vende su cosecha, el mercado se queda con las plantas" {
+        
+        const maiz = new Maiz()
+        const tomaco = new Tomaco()
+        personaje.sembrar(tomaco)
+        personaje.position(personaje.position().up(1))
+        personaje.sembrar(maiz)
+        personaje.regarCultivo()
+        personaje.cosecharCultivo()
+        personaje.position(personaje.position().down(1))
+        personaje.cosecharCultivo()
+
+        const mercado = mercadosEnElJuego.losMercados().get(0)
+        personaje.position(game.at(0,9))
+
+        personaje.venderCosecha()
+
+        assert.equals([], personaje.cosecha())
+        assert.equals([maiz, tomaco], mercado.mercaderias())
+    }
+
+    test "Al vender la cosecha el granjero intercambia monedas con el mercado" {
+        
+        const maiz = new Maiz()
+        const tomaco = new Tomaco()
+        personaje.sembrar(tomaco)
+        personaje.position(personaje.position().up(1))
+        personaje.sembrar(maiz)
+        personaje.regarCultivo()
+        personaje.cosecharCultivo()
+        personaje.position(personaje.position().down(1))
+        personaje.cosecharCultivo()
+
+        const mercado = mercadosEnElJuego.losMercados().get(0)
+        const monedas = mercado.monedas()
+        personaje.position(game.at(0,9))
+
+        personaje.venderCosecha()
+
+        assert.equals(230, personaje.oroAcumulado())
+        assert.equals(monedas - 230, mercado.monedas())
+    }
+}
