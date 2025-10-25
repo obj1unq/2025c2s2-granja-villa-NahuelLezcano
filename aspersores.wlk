@@ -15,7 +15,7 @@ class Aspersor {
 
     method regarPlantas() {         
         self.actualizarPlantasLimitrofes()   
-        plantasLimitrofes.forEach({planta => planta.recibirRiego()})
+        plantasLimitrofes.forEach({planta => planta.recibirRiegoDelAspersor()})
         plantasLimitrofes.clear()   
     }
     

@@ -9,7 +9,9 @@ class Maiz {
 	
 	method image() = estado.imagen()
 
-	method recibirRiego() { estado = adultCorn }
+	method recibirRiegoDelAspersor() { self.regar() }
+
+	method regar() { estado = adultCorn }
 
 	method estaListoParaCosechar() { return estado.listoParaCosecha() }
 
@@ -37,7 +39,11 @@ class Trigo {
 	
 	method image() = "wheat_" + etapa + ".png"
 
-	method recibirRiego() {
+	method recibirRiegoDelAspersor() {
+		self.regar()
+	}
+
+	method regar() {
 		if(etapa < 3) { etapa += 1} else { etapa = 0 }
 	}
 
@@ -54,7 +60,7 @@ class Tomaco {
   	var property position = game.at(0, 0)
 	var property image = "tomaco.png"
 
-	method recibirRiego() { /*Nada*/ }
+	method recibirRiegoDelAspersor() { /*Nada*/ }
 
 	method regar() {
 		if(self.enLimite(personaje)) {
